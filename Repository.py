@@ -11,7 +11,7 @@ from PyGameFacade import set_size
 def load_state(project_name : str) -> dict:
     with open(f"{project_name}/state.s", "rb") as f:
         state = load(f)
-        state["environment"].load(project_name)
+        state["environment"].load(project_name)  
         return state
 
 def store_state(state : dict):

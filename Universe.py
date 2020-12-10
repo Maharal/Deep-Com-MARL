@@ -30,6 +30,9 @@ class Environment(IEnvironment):
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
         self.force_wall = force_wall
         self.dist_wall = dist_wall
+        self.num_steps = 5000
+        self.step = 0
+        self.epoch = 0
   
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
@@ -67,12 +70,14 @@ class Environment(IEnvironment):
     def __friction_force(self, obj : MovableBase):
         obj.vel += -self.eta * obj.vel
 
-    def __collision_force(self, i : Landmark, items : MovableBase):
+    def __collision_force(self, i : MovableBase, items : MovableBase, comp_reward = False):
         for j in items:
             if i != j and i.has_intersection(j):
                 d_pos = i.pos - j.pos
                 d_pos.scale_to_length(abs(i.radius + j.radius - d_pos.magnitude()))
                 i.add_force(d_pos)
+                if comp_reward:
+                    j.monitoring(i)
 
     def __fix_position(self, i : Landmark, items : MovableBase):
         for j in items:
@@ -81,38 +86,52 @@ class Environment(IEnvironment):
                 d_pos.scale_to_length(abs(i.radius + j.radius - d_pos.magnitude()))
                 i.pos += d_pos
 
+    def __frozen(self, landmark):
+        for goal in self.goals:
+            if landmark.is_inside(goal) and not landmark.frozen:
+                landmark.reward_monitored(3000)
+                landmark.frozen = True
+                break    
+
+    def __explore(self):
+        for agent in self.agents:
+            agent.R += -0.1
+            self.__apply_constrains(agent)
+            self.__wall_force(agent)
+            self.__collision_force(agent, self.landmarks, True)
+        for landmark in self.landmarks:
+            self.__apply_constrains(landmark)
+            self.__wall_force(landmark)
+            self.__friction_force(landmark)
+            self.__frozen(landmark)
+            self.__collision_force(landmark, self.landmarks + self.agents)
+        for movable in self.agents + self.landmarks:
+            self.__fix_position(movable, self.agents + self.landmarks)
+        mensages = []
+        for agent in self.agents:
+            msg = agent.next_state(self)
+            mensages.append(msg)
+        for landmark in self.landmarks:
+            landmark.next_state()
+            landmark.clear_monitored()
+
     def draw(self, screen : Surface):
         for obj in self.goals + self.agents + self.landmarks:
             obj.draw(screen)
 
     def next_state(self):
-        for agent in self.agents:
-            self.__apply_constrains(agent)
-            self.__wall_force(agent)
-            self.__collision_force(agent, self.landmarks)
+        self.step += 1
+        if self.step < self.num_steps:
+            self.__explore()
+        else:
+            self.step = 0
+            self.epoch += 1
+            print(f"EPOCH {self.epoch}: Start learning...")
 
-        for landmark in self.landmarks:
-            self.__apply_constrains(landmark)
-            self.__wall_force(landmark)
-            self.__friction_force(landmark)
-            self.__collision_force(landmark, self.landmarks + self.agents)
+            
 
-        for movable in self.agents + self.landmarks:
-            self.__fix_position(movable, self.agents + self.landmarks)
-
-        mensages = []
-        for agent in self.agents:
-            msg = agent.next_state(self)
-            mensages.append(msg)
-
-        for landmark in self.landmarks:
-            landmark.frozen = False
-            for goal in self.goals:
-                if landmark.is_inside(goal):
-                    landmark.frozen = True
-                    break
-            landmark.next_state()
-    
+            print("end learning...")
+            
     def load(self, path : str):
         for agent in self.agents:
             agent.load(f"{path}/model_{agent._id}.h5")
