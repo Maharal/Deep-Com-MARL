@@ -25,7 +25,7 @@ class Environment(IEnvironment):
         ):
         self.eta = eta
         self.size_screen = size_screen
-        self.agents = [Agent(agent_param["setup"], agent_param["num"], landmark_param["num"], size_chanel, size_epoch) for _ in range(agent_param["num"])]
+        self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_chanel, size_epoch) for _id in range(agent_param["num"])]
         self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
         self.force_wall = force_wall
@@ -112,3 +112,11 @@ class Environment(IEnvironment):
                     landmark.frozen = True
                     break
             landmark.next_state()
+    
+    def load(self, path : str):
+        for agent in self.agents:
+            agent.load(f"{path}/model_{agent._id}.h5")
+            
+    def store(self, path : str):
+        for agent in self.agents:
+            agent.store(f"{path}/model_{agent._id}.h5")

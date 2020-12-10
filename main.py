@@ -23,7 +23,7 @@ def start_state() -> dict:
         store_state(initial_state)
         return initial_state
     else:
-        state = load_state(args.file_name)
+        state = load_state(args.project_name)
         state = set_arg(state, "visualization", args.visualization_on, args.visualization_off)
         state = set_arg(state, "train", args.train, args.test)
         if not state["visualization"] and args.visualization_on:

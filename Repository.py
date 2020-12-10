@@ -1,6 +1,7 @@
 # Standard import libraries
 from pickle import load, dump
 from argparse import ArgumentParser, Namespace
+import os
 
 # Local application import
 from Config import arg_parser
@@ -8,14 +9,17 @@ from PyGameFacade import set_size
 
 
 def load_state(project_name : str) -> dict:
-    with open(f"{project_name}-state.s", "rb") as f:
-        return load(f)
-
+    with open(f"{project_name}/state.s", "rb") as f:
+        state = load(f)
+        state["environment"].load(project_name)
+        return state
 
 def store_state(state : dict):
-    with open(f"{state['project_name']}-state.s", "wb" ) as f:
+    if not os.path.exists(state["project_name"]):
+        os.makedirs(state["project_name"])
+    state["environment"].store(state["project_name"])
+    with open(f"{state['project_name']}/state.s", "wb" ) as f:
         dump(state, f)
-
 
 def get_arguments() -> Namespace:
     parser = ArgumentParser(**arg_parser["description_info"])
