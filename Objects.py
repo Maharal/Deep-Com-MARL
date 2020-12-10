@@ -81,6 +81,7 @@ class Agent(MovableBase):
         self.brain.load_state_dict(torch.load(file_path))
         self.brain.eval()
 
+
 class Landmark(MovableBase):
     def __init__(self, landmark_param : dict, thresold : float = 5):
         super().__init__(**landmark_param)
