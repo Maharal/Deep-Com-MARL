@@ -35,9 +35,6 @@ class Environment(IEnvironment):
         self.step = 0
         self.epoch = 0
         self.gamma = 0.954
-        self.reset(agent_param, landmark_param, goal_param, size_channel, num_steps)
-    
-    def reset(self, agent_param : dict, landmark_param : dict, goal_param : dict, size_channel : int, num_steps : int):
         self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_channel, num_steps) for _id in range(agent_param["num"])]
         self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
@@ -45,7 +42,7 @@ class Environment(IEnvironment):
 
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
-            if i.has_intersection(item):
+            if i.has_intersection(item) and i is not item:
                 return True
         return False
 
@@ -57,6 +54,20 @@ class Environment(IEnvironment):
                 new = type_class(param)
             l.append(new)
         return l
+
+    def __reset_without_intersec(self) -> List[ObjectBase]:
+        for land in self.landmarks:
+            land.new_pos()
+            while self.__has_has_intersection(self.landmarks, land):
+                land.new_pos()
+        for goal in self.goals:
+            goal.new_pos()
+            while self.__has_has_intersection(self.goals, goal):
+                goal.new_pos()
+        for agent in self.agents:
+            agent.new_pos()
+            while self.__has_has_intersection(self.agents, agent):
+                agent.new_pos()
 
     def __apply_constrains(self, obj : MovableBase):
         width, height = self.size_screen
@@ -145,6 +156,8 @@ class Environment(IEnvironment):
                 #plt.plot(ER)
                 #plt.show()
             print("end learning...")
+            print("new wolrd...")
+            self.__reset_without_intersec()
             
     def load(self, path : str):
         for agent in self.agents:

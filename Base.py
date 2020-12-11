@@ -10,13 +10,17 @@ from Interfaces import IEnvironment
 
 class ObjectBase(metaclass = ABCMeta):
     def __init__(self, diam : float, color : tuple, constrain : tuple, stroke_weight : int = 0):
-        x_min, y_min, x_max, y_max = constrain
-        self.pos = Vector2(randint(x_min, x_max), randint(y_min, y_max))
+        self.constrain = constrain
         self.diam = diam
         self.radius = 0.5 * diam
         self.color = color
         self.stroke_weight = stroke_weight
         self.frozen = False
+        self.new_pos()
+
+    def new_pos(self):
+        x_min, y_min, x_max, y_max = self.constrain
+        self.pos = Vector2(randint(x_min, x_max), randint(y_min, y_max))
 
     def draw(self, screen : Surface):
         dimensions = (self.pos.x - self.radius, self.pos.y - self.radius, self.diam, self.diam)
