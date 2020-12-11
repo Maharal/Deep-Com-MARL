@@ -39,7 +39,7 @@ class Agent(MovableBase):
         self.size_chanel = size_chanel
         self.size_epoch = size_epoch
         self.epoch = 0
-        self.reward = []
+        self.rewards = []
         self.actions = []
         self.states = []
         self.mensage = torch.zeros(size_chanel)
@@ -63,7 +63,8 @@ class Agent(MovableBase):
         self.forward = random() <= r
 
     def __forward(self):
-        self.R *= 0.5
+        self.rewards.append(self.R)
+        self.R = 0
         self.vel += dt * self.acc;
         self.vel.scale_to_length(self.vel_const) 
         if self.forward:
@@ -90,6 +91,11 @@ class Agent(MovableBase):
         self.R += reward
         if reward > 0:
             print(f"yup! {reward}")
+            
+    def clear_memory(self):
+        self.rewards = []
+        self.actions = []
+        self.states = []
 
 
 class Landmark(MovableBase):
@@ -98,24 +104,29 @@ class Landmark(MovableBase):
         self.thresold = thresold
         self.monitored_agents = []
         self.frozen = False
+        self.timer = 0
 
     def next_state(self):
-        if self.thresold < self.acc.magnitude():
+        if self.thresold < self.acc.magnitude() and not self.frozen: 
             self.vel += self.acc * dt
             self.reward_monitored(1 * self.vel.magnitude())
         super().next_state()
-
+        
     def monitoring(self, agent : Agent):
-        self.monitored_agents.append(agent)
+        if agent not in self.monitored_agents:
+            self.timer = 20
+            self.monitored_agents.append(agent)
         
     def reward_monitored(self, reward):
         for agent in self.monitored_agents:
             agent.add_reward(reward)
     
     def clear_monitored(self):
-        self.monitored_agents = []
+        if self.timer >= 0:
+            self.timer -= 1
+        else:
+            self.monitored_agents = []
         
-    
 class Goal(ObjectBase):
     def __init__(self, goal_param : dict): 
         super().__init__(**goal_param)

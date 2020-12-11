@@ -8,14 +8,14 @@ from Universe import Environment
 
 
 # Configuration of object environment
-NUM_LANDMARKS = 4
+NUM_LANDMARKS = 5
 SIZE_SCREEN = (512, 512)
 BORDER = 80
 CONSTRAIN_GEN = (BORDER, BORDER, SIZE_SCREEN[0]-BORDER, SIZE_SCREEN[1]-BORDER)
 
 environment_param = {
     "agent_param" : {
-        "num" : 3,
+        "num" : 4,
         "setup" : {
             "diam" : 15, 
             "color": RED,
@@ -42,7 +42,7 @@ environment_param = {
     "size_screen" : SIZE_SCREEN,
     "dist_wall" : BORDER,
     "force_wall" : 6,
-    "eta" : 0.1,
+    "eta" : 0.07,
     "size_chanel" : 3, 
     "size_epoch" : 4000
 }

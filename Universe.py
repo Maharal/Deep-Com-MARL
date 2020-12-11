@@ -3,6 +3,8 @@ from random import random
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Local application import
 from PyGameFacade import *
@@ -30,9 +32,10 @@ class Environment(IEnvironment):
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
         self.force_wall = force_wall
         self.dist_wall = dist_wall
-        self.num_steps = 5000
+        self.num_steps = 4000
         self.step = 0
         self.epoch = 0
+        self.gamma = 0.99
   
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
@@ -78,6 +81,8 @@ class Environment(IEnvironment):
                 i.add_force(d_pos)
                 if comp_reward:
                     j.monitoring(i)
+                    if j.frozen:
+                        i.add_reward(-1)
 
     def __fix_position(self, i : Landmark, items : MovableBase):
         for j in items:
@@ -89,16 +94,16 @@ class Environment(IEnvironment):
     def __frozen(self, landmark):
         for goal in self.goals:
             if landmark.is_inside(goal) and not landmark.frozen:
-                landmark.reward_monitored(3000)
+                landmark.reward_monitored(10)
                 landmark.frozen = True
                 break    
 
     def __explore(self):
         for agent in self.agents:
-            agent.R += -0.1
             self.__apply_constrains(agent)
             self.__wall_force(agent)
             self.__collision_force(agent, self.landmarks, True)
+            agent.R += -0.001
         for landmark in self.landmarks:
             self.__apply_constrains(landmark)
             self.__wall_force(landmark)
@@ -128,8 +133,14 @@ class Environment(IEnvironment):
             self.epoch += 1
             print(f"EPOCH {self.epoch}: Start learning...")
 
-            
+            for agent in self.agents:
+                print(agent.rewards)            
 
+                ER = torch.tensor([np.sum(agent.rewards[i:]*(self.gamma**np.array(range(i, len(agent.rewards))))) for i in range(len(agent.rewards))])
+                plt.plot(ER)
+                plt.show()
+            
+            exit()
             print("end learning...")
             
     def load(self, path : str):
