@@ -1,5 +1,7 @@
 # Third part import
 from random import random
+
+from numpy.core.fromnumeric import size
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -22,21 +24,25 @@ class Environment(IEnvironment):
             force_wall : float, 
             dist_wall : float, 
             eta : float,
-            size_chanel : int, 
-            size_epoch : int
+            size_channel : int, 
+            num_steps : int
         ):
         self.eta = eta
         self.size_screen = size_screen
-        self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_chanel, size_epoch) for _id in range(agent_param["num"])]
-        self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
-        self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
         self.force_wall = force_wall
         self.dist_wall = dist_wall
-        self.num_steps = 1000
+        self.num_steps = num_steps
         self.step = 0
         self.epoch = 0
         self.gamma = 0.954
-  
+        self.reset(agent_param, landmark_param, goal_param, size_channel, num_steps)
+    
+    def reset(self, agent_param : dict, landmark_param : dict, goal_param : dict, size_channel : int, num_steps : int):
+        self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_channel, num_steps) for _id in range(agent_param["num"])]
+        self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
+        self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
+
+
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
             if i.has_intersection(item):
@@ -94,7 +100,7 @@ class Environment(IEnvironment):
     def __frozen(self, landmark):
         for goal in self.goals:
             if landmark.is_inside(goal) and not landmark.frozen:
-                landmark.reward_monitored(100)
+                landmark.reward_monitored(10)
                 landmark.frozen = True
                 break    
 
@@ -132,14 +138,12 @@ class Environment(IEnvironment):
             self.epoch += 1
             print(f"EPOCH {self.epoch}: Start learning...")
 
-            for agent in self.agents:
-                print(agent.rewards)            
+            #for agent in self.agents:
+            #print(agent.rewards)            
 
-                ER = torch.tensor([np.sum(agent.rewards[i:]*(self.gamma**np.array(range(i, len(agent.rewards))))) for i in range(len(agent.rewards))])
-                plt.plot(ER)
-                plt.show()
-            
-            exit()
+                #ER = torch.tensor([np.sum(agent.rewards[i:]*(self.gamma**np.array(range(i, len(agent.rewards))))) for i in range(len(agent.rewards))])
+                #plt.plot(ER)
+                #plt.show()
             print("end learning...")
             
     def load(self, path : str):

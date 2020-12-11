@@ -115,12 +115,12 @@ class Landmark(MovableBase):
         
     def monitoring(self, agent : Agent):
         if agent not in self.monitored_agents:
-            self.timer = 20
             self.monitored_agents.append(agent)
         
     def reward_monitored(self, reward):
-        for agent in self.monitored_agents:
-            agent.add_reward(reward)
+        if len(self.monitored_agents) > 1:
+            for agent in self.monitored_agents:
+                agent.add_reward(reward)
     
     def clear_monitored(self):
         if self.acc.magnitude() <= self.thresold:
