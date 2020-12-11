@@ -32,10 +32,10 @@ class Environment(IEnvironment):
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
         self.force_wall = force_wall
         self.dist_wall = dist_wall
-        self.num_steps = 4000
+        self.num_steps = 1000
         self.step = 0
         self.epoch = 0
-        self.gamma = 0.99
+        self.gamma = 0.954
   
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
@@ -94,7 +94,7 @@ class Environment(IEnvironment):
     def __frozen(self, landmark):
         for goal in self.goals:
             if landmark.is_inside(goal) and not landmark.frozen:
-                landmark.reward_monitored(10)
+                landmark.reward_monitored(100)
                 landmark.frozen = True
                 break    
 
@@ -103,7 +103,6 @@ class Environment(IEnvironment):
             self.__apply_constrains(agent)
             self.__wall_force(agent)
             self.__collision_force(agent, self.landmarks, True)
-            agent.R += -0.001
         for landmark in self.landmarks:
             self.__apply_constrains(landmark)
             self.__wall_force(landmark)

@@ -26,23 +26,6 @@ BLUE  = (0, 0, 255)
 CYAN  = (0, 255, 255)
 dt = 0.5
 
-# Contex manage for draw things on screen
-class Visualization(object):
-    def __init__(self, graphics : bool, steps : list, graphics_steps : list = []):
-        self.graphics = graphics
-        self.steps = steps 
-        if graphics:
-            self.steps += graphics_steps
-    
-    def __enter__(self):
-        if self.graphics:
-            init()
-        return self.steps
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        if self.graphics:
-            quit()
-
 
 # Complement functions 
 def background(screen : Surface, color : tuple):

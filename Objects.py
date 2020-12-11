@@ -63,8 +63,6 @@ class Agent(MovableBase):
         self.forward = random() <= r
 
     def __forward(self):
-        self.rewards.append(self.R)
-        self.R = 0
         self.vel += dt * self.acc;
         self.vel.scale_to_length(self.vel_const) 
         if self.forward:
@@ -78,6 +76,7 @@ class Agent(MovableBase):
         self.__walk(actions[0], actions[1], actions[2])  
         self.mensage = actions[3:]
         self.__forward()
+        self.__update_rewards()
         return actions
 
     def store(self, file_path : str):
@@ -97,6 +96,9 @@ class Agent(MovableBase):
         self.actions = []
         self.states = []
 
+    def __update_rewards(self):
+        self.rewards.append(self.R)
+        self.R = 0
 
 class Landmark(MovableBase):
     def __init__(self, landmark_param : dict, thresold : float = 5):
@@ -104,7 +106,6 @@ class Landmark(MovableBase):
         self.thresold = thresold
         self.monitored_agents = []
         self.frozen = False
-        self.timer = 0
 
     def next_state(self):
         if self.thresold < self.acc.magnitude() and not self.frozen: 
@@ -122,9 +123,7 @@ class Landmark(MovableBase):
             agent.add_reward(reward)
     
     def clear_monitored(self):
-        if self.timer >= 0:
-            self.timer -= 1
-        else:
+        if self.acc.magnitude() <= self.thresold:
             self.monitored_agents = []
         
 class Goal(ObjectBase):

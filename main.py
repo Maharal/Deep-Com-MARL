@@ -8,6 +8,7 @@ from time import sleep
 from PyGameFacade import *
 from Config import initial_state
 from Repository import *
+from ContexManager import Visualization
 
 global screen
 
@@ -66,9 +67,6 @@ def draw(state : dict) -> dict:
 
 if __name__ == "__main__":
     state = start_state()
-    with Visualization(state["visualization"], [compute_time, update], [events, draw]) as steps:
-        try:
-            while state["in_game"]:
-                state = reduce(lambda x, f : f(x), steps, state)
-        except KeyboardInterrupt:
-            store_state(state)
+    with Visualization(state, pure_steps = [compute_time, update], side_effect_steps = [events, draw]) as steps:
+        while state["in_game"]:
+            state = reduce(lambda x, f : f(x), steps, state)
