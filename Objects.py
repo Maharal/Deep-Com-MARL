@@ -47,7 +47,8 @@ class Agent(MovableBase):
         self.forward = False
         self.vel = Vector2(vel_const * normal(), vel_const * normal())
         self._id = _id
-        self.R = 0
+        self.reward = 0
+        self.has_learn = False
                 
     def __perception(self, environment):
         msg = [agent.mensage for agent in environment.agents if agent is not self]
@@ -86,19 +87,21 @@ class Agent(MovableBase):
         self.brain.load_state_dict(torch.load(file_path))
         self.brain.eval()
 
-    def add_reward(self, reward):
-        self.R += reward
-        if reward > 0:
-            print(f"yup! {reward}")
+    def add_reward(self, r):
+        self.has_learn = True
+        self.reward += r
+        if r > 0:
+            print(f"R: {r}")
             
     def clear_memory(self):
         self.rewards = []
         self.actions = []
         self.states = []
+        self.has_learn = False
 
     def __update_rewards(self):
-        self.rewards.append(self.R)
-        self.R = 0
+        self.rewards.append(self.reward)
+        self.reward = 0
 
 class Landmark(MovableBase):
     def __init__(self, landmark_param : dict, thresold : float = 5):
@@ -123,7 +126,7 @@ class Landmark(MovableBase):
                 agent.add_reward(reward)
     
     def clear_monitored(self):
-        if self.acc.magnitude() <= self.thresold:
+        if self.acc.magnitude() <= 0.01:
             self.monitored_agents = []
         
 class Goal(ObjectBase):

@@ -58,6 +58,7 @@ class Environment(IEnvironment):
     def __reset_without_intersec(self) -> List[ObjectBase]:
         for land in self.landmarks:
             land.new_pos()
+            land.frozen = False
             while self.__has_has_intersection(self.landmarks, land):
                 land.new_pos()
         for goal in self.goals:
@@ -145,16 +146,17 @@ class Environment(IEnvironment):
         if self.step < self.num_steps:
             self.__explore()
         else:
+            print(f"EPOCH {self.epoch}:")
             self.step = 0
             self.epoch += 1
-            print(f"EPOCH {self.epoch}: Start learning...")
+            print(f"Start learning...")
 
-            #for agent in self.agents:
-            #print(agent.rewards)            
-
-                #ER = torch.tensor([np.sum(agent.rewards[i:]*(self.gamma**np.array(range(i, len(agent.rewards))))) for i in range(len(agent.rewards))])
-                #plt.plot(ER)
-                #plt.show()
+            for agent in self.agents:
+                 if agent.has_learn:
+                    Gt = torch.tensor([np.sum(agent.rewards[i:]*(self.gamma**np.array(range(i, len(agent.rewards))))) for i in range(len(agent.rewards))])
+                
+                    agent.clear_memory()
+                
             print("end learning...")
             print("new wolrd...")
             self.__reset_without_intersec()

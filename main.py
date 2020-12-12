@@ -67,6 +67,6 @@ def draw(state : dict) -> dict:
 
 if __name__ == "__main__":
     state = start_state()
-    with Visualization(state, pure_steps = [compute_time, update], side_effect_steps = [events, draw]) as steps:
+    with Visualization(state, [compute_time, update], [events, draw]) as steps:
         while state["in_game"]:
             state = reduce(lambda x, f : f(x), steps, state)
