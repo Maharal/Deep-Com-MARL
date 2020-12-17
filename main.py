@@ -10,7 +10,11 @@ from Config import initial_state
 from Repository import *
 from ContexManager import Visualization
 
+
+
 global screen
+
+
 
 def start_state() -> dict:
     global screen
@@ -34,6 +38,7 @@ def start_state() -> dict:
         return state
 
 
+
 def compute_time(state : dict) -> dict:
     time_now = now()
     time = state["time"]
@@ -45,6 +50,7 @@ def compute_time(state : dict) -> dict:
     return state
 
 
+
 def events(state : dict) -> dict:
     for event in get_event():
         if event.type is QUIT:
@@ -53,9 +59,11 @@ def events(state : dict) -> dict:
     return state
 
 
+
 def update(state : dict) -> dict:
     state["environment"].next_state()
     return state
+
 
 
 def draw(state : dict) -> dict:
@@ -63,6 +71,7 @@ def draw(state : dict) -> dict:
     state["environment"].draw(screen)
     update_screen()
     return state
+
 
 
 if __name__ == "__main__":

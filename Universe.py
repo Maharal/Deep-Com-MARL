@@ -1,6 +1,7 @@
-# Third part import
+# Standard import
 from random import random
 
+# Third part import
 from numpy.core.fromnumeric import size
 import torch
 import torch.nn as nn
@@ -13,6 +14,7 @@ from PyGameFacade import *
 from Interfaces import IEnvironment
 from Base import MovableBase, ObjectBase
 from Objects import Agent, Landmark, Goal
+
 
 
 class Environment(IEnvironment):
@@ -150,13 +152,10 @@ class Environment(IEnvironment):
             self.step = 0
             self.epoch += 1
             print(f"Start learning...")
-
             for agent in self.agents:
                  if agent.has_learn:
                     Gt = torch.tensor([np.sum(agent.rewards[i:]*(self.gamma**np.array(range(i, len(agent.rewards))))) for i in range(len(agent.rewards))])
-                
                     agent.clear_memory()
-                
             print("end learning...")
             print("new wolrd...")
             self.__reset_without_intersec()

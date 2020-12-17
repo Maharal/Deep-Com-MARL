@@ -8,6 +8,7 @@ from PyGameFacade import *
 from Interfaces import IEnvironment
 
 
+
 class ObjectBase(metaclass = ABCMeta):
     def __init__(self, diam : float, color : tuple, constrain : tuple, stroke_weight : int = 0):
         self.constrain = constrain
@@ -31,6 +32,8 @@ class ObjectBase(metaclass = ABCMeta):
 
     def is_inside(self, obj : 'ObjectBase') -> bool:
         return obj.radius >= self.radius + (obj.pos - self.pos).magnitude()
+
+
 
 class MovableBase(ObjectBase):
     def __init__(self, diam : float, color : tuple, constrain : tuple, stroke_weight : int = 0):

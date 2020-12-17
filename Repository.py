@@ -8,11 +8,14 @@ from Config import arg_parser
 from PyGameFacade import set_size
 
 
+
 def load_state(project_name : str) -> dict:
     with open(f"{project_name}/state.s", "rb") as f:
         state = load(f)
         state["environment"].load(project_name)  
         return state
+
+
 
 def store_state(state : dict):
     if not os.path.exists(state["project_name"]):
@@ -20,6 +23,8 @@ def store_state(state : dict):
     state["environment"].store(state["project_name"])
     with open(f"{state['project_name']}/state.s", "wb" ) as f:
         dump(state, f)
+
+
 
 def get_arguments() -> Namespace:
     parser = ArgumentParser(**arg_parser["description_info"])
@@ -32,6 +37,7 @@ def get_arguments() -> Namespace:
     assert not args.visualization_off or not args.visualization_on 
     assert not args.train or not args.test 
     return args
+
 
 
 def set_arg(state : dict, attr : str, f_true : bool, f_false :  bool) -> dict:

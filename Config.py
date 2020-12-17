@@ -7,12 +7,15 @@ from PyGameFacade import *
 from Universe import Environment
 
 
+
 # Configuration of object environment
 NUM_LANDMARKS = 4
 NUM_AGENTS = 4
 SIZE_SCREEN = (512, 512)
 BORDER = 80
 CONSTRAIN_GEN = (BORDER, BORDER, SIZE_SCREEN[0]-BORDER, SIZE_SCREEN[1]-BORDER)
+
+
 
 environment_param = {
     "agent_param" : {
@@ -49,6 +52,7 @@ environment_param = {
 }
 
 
+
 # Initial state of game
 initial_state = {
     "time" : {
@@ -60,6 +64,7 @@ initial_state = {
     "in_game" : True,
     "environment" : Environment(**environment_param)
 }
+
 
 
 # Definition of arg parser parameters

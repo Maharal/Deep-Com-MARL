@@ -14,7 +14,11 @@ from pygame.math import Vector2
 from pygame import Surface
 from pygame import K_RETURN, KEYDOWN
 
+
+
 global dt
+
+
 
 # Colors
 WHITE = (255, 255, 255)
@@ -27,9 +31,11 @@ CYAN  = (0, 255, 255)
 dt = 0.5
 
 
+
 # Complement functions 
 def background(screen : Surface, color : tuple):
     screen.fill(color)
+
 
 
 def constrain(value, min_value, max_value):

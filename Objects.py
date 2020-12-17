@@ -12,6 +12,8 @@ from PyGameFacade import *
 from Interfaces import IEnvironment
 from Base import ObjectBase, MovableBase
 
+
+
 class Brain(nn.Module):
     def __init__(self, n_landmark : int, n_agents : int, size_channel : int, hidden_size = 16):
         super(Brain, self).__init__()
@@ -31,6 +33,8 @@ class Brain(nn.Module):
             return x.reshape(-1)
         else:
             return x
+
+
 
 class Agent(MovableBase):
     def __init__(self, _id : int, agent_param : dict, n_agents : int, n_landmarks : int, size_chanel : int, size_epoch : int, vel_const : float = 10):
@@ -103,6 +107,8 @@ class Agent(MovableBase):
         self.rewards.append(self.reward)
         self.reward = 0
 
+
+
 class Landmark(MovableBase):
     def __init__(self, landmark_param : dict, thresold : float = 5):
         super().__init__(**landmark_param)
@@ -128,6 +134,8 @@ class Landmark(MovableBase):
     def clear_monitored(self):
         if self.acc.magnitude() <= 0.01:
             self.monitored_agents = []
+        
+        
         
 class Goal(ObjectBase):
     def __init__(self, goal_param : dict): 
