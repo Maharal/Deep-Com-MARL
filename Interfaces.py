@@ -5,6 +5,7 @@ from abc import ABCMeta
 from PyGameFacade import *
 
 
+
 class IEnvironment(metaclass = ABCMeta):
     def __init__(self):
         pass
