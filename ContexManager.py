@@ -2,6 +2,8 @@
 from PyGameFacade import init
 from Repository import store_state
 
+
+
 class Visualization(object):
     def __init__(self, state : dict, pure_steps : list = [], side_effect_steps : list = []):
         self.steps = pure_steps + (side_effect_steps if state["visualization"] else [])

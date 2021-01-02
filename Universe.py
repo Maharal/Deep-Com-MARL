@@ -41,7 +41,6 @@ class Environment(IEnvironment):
         self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
 
-
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
             if i.has_intersection(item) and i is not item:
