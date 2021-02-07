@@ -15,4 +15,8 @@ class Visualization(object):
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if exc_type is KeyboardInterrupt : store_state(self.state)
+        if exc_type is not None:
+            print(exc_type)
+            print(exc_value)
+            exc_traceback.print_exc()
         if self.state["visualization"] : quit()

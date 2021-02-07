@@ -35,7 +35,6 @@ class Brain(nn.Module):
             return x
 
 
-
 class Agent(MovableBase):
     def __init__(self, _id : int, agent_param : dict, n_agents : int, n_landmarks : int, size_chanel : int, size_epoch : int, vel_const : float = 10):
         super().__init__(**agent_param)
@@ -94,7 +93,7 @@ class Agent(MovableBase):
     def add_reward(self, r):
         self.has_learn = True
         self.reward += r
-        if r > 0:
+        if r != 0:
             print(f"R: {r}")
             
     def clear_memory(self):
@@ -108,7 +107,6 @@ class Agent(MovableBase):
         self.reward = 0
 
 
-
 class Landmark(MovableBase):
     def __init__(self, landmark_param : dict, thresold : float = 5):
         super().__init__(**landmark_param)
@@ -119,7 +117,7 @@ class Landmark(MovableBase):
     def next_state(self):
         if self.thresold < self.acc.magnitude() and not self.frozen: 
             self.vel += self.acc * dt
-            self.reward_monitored(1 * self.vel.magnitude())
+            self.reward_monitored(0.5)
         super().next_state()
         
     def monitoring(self, agent : Agent):
@@ -130,11 +128,10 @@ class Landmark(MovableBase):
         if len(self.monitored_agents) > 1:
             for agent in self.monitored_agents:
                 agent.add_reward(reward)
-    
+
     def clear_monitored(self):
         if self.acc.magnitude() <= 0.01:
             self.monitored_agents = []
-        
         
         
 class Goal(ObjectBase):

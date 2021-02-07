@@ -1,5 +1,6 @@
 # Standard import
 from random import random
+from typing import List
 
 # Third part import
 from numpy.core.fromnumeric import size
@@ -10,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Local application import
-from PyGameFacade import *
+from PyGameFacade import constrain, Vector2, Surface
 from Interfaces import IEnvironment
 from Base import MovableBase, ObjectBase
 from Objects import Agent, Landmark, Goal
@@ -36,7 +37,7 @@ class Environment(IEnvironment):
         self.num_steps = num_steps
         self.step = 0
         self.epoch = 0
-        self.gamma = 0.954
+        self.gamma = 0.995
         self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_channel, num_steps) for _id in range(agent_param["num"])]
         self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
@@ -100,8 +101,6 @@ class Environment(IEnvironment):
                 i.add_force(d_pos)
                 if comp_reward:
                     j.monitoring(i)
-                    if j.frozen:
-                        i.add_reward(-1)
 
     def __fix_position(self, i : Landmark, items : MovableBase):
         for j in items:
@@ -113,7 +112,7 @@ class Environment(IEnvironment):
     def __frozen(self, landmark):
         for goal in self.goals:
             if landmark.is_inside(goal) and not landmark.frozen:
-                landmark.reward_monitored(10)
+                landmark.reward_monitored(1)
                 landmark.frozen = True
                 break    
 
@@ -152,9 +151,15 @@ class Environment(IEnvironment):
             self.epoch += 1
             print(f"Start learning...")
             for agent in self.agents:
-                 if agent.has_learn:
-                    Gt = torch.tensor([np.sum(agent.rewards[i:]*(self.gamma**np.array(range(i, len(agent.rewards))))) for i in range(len(agent.rewards))])
-                    agent.clear_memory()
+                if agent.has_learn:
+                    print(len(agent.rewards))
+                    Gt = torch.tensor([np.sum(agent.rewards[i:]*(self.gamma**(np.array(range(0, len(agent.rewards) - i))))) for i in range(len(agent.rewards))])
+                    plt.plot(range(len(Gt)), Gt)
+                    plt.plot(range(len(agent.rewards)),np.array(agent.rewards))
+                    plt.show()
+                    print(Gt)
+                    print("Limpa memoria")
+                agent.clear_memory()
             print("end learning...")
             print("new wolrd...")
             self.__reset_without_intersec()
