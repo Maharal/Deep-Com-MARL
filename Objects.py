@@ -25,14 +25,11 @@ class Brain(nn.Module):
         self.h = torch.zeros(1, 1, hidden_size).to(self.device)
         self.c = torch.zeros(1, 1, hidden_size).to(self.device)
         
-    def forward(self, x, batch_size = 1, num_steps = 1):
-        x = x.reshape(batch_size, num_steps, -1).to(self.device)
+    def forward(self, x):
+#        x = x.reshape(batch_size, num_steps, -1).to(self.device)
         hs, (h, c) = self.lstm1(x, (self.h, self.c))
         out = self.seq(hs)
-        if batch_size == 1 and num_steps == 1:
-            return out.reshape(-1)
-        else:
-            return out
+        return out
 
 
 class Agent(MovableBase):
@@ -81,7 +78,7 @@ class Agent(MovableBase):
         self.states.append(event)
         self.brain.eval()
         with torch.no_grad():
-            actions = self.brain.forward(event)
+            actions = self.brain.forward(event.reshape(1, 1, -1)).reshape(-1)
         self.__walk(actions[0], actions[1], actions[2])  
         self.mensage = actions[3:]
         self.__forward()
@@ -115,7 +112,8 @@ class Agent(MovableBase):
             self.brain.train()
             self.optimizer.zero_grad()
             Gt = 0.2 * torch.tensor([np.sum(self.rewards[i:]*(self.gamma**(np.array(range(0, len(self.rewards) - i))))) for i in range(len(self.rewards))], requires_grad = False)            
-            actions = self.brain(torch.stack(self.states, dim = 0), 1, 99)
+            states = torch.stack(self.states, dim = 0).unsqueeze(0)
+            actions = self.brain(states)
             log = torch.log(1 - actions).sum(axis = 2)
             loss = torch.mean(Gt * log)
             loss = torch.mean(actions)
