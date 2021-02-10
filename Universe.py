@@ -37,7 +37,6 @@ class Environment(IEnvironment):
         self.num_steps = num_steps
         self.step = 0
         self.epoch = 0
-        self.gamma = 0.995
         self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_channel, num_steps) for _id in range(agent_param["num"])]
         self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
@@ -112,7 +111,7 @@ class Environment(IEnvironment):
     def __frozen(self, landmark):
         for goal in self.goals:
             if landmark.is_inside(goal) and not landmark.frozen:
-                landmark.reward_monitored(1)
+                landmark.reward_monitored(5)
                 landmark.frozen = True
                 break    
 
@@ -149,19 +148,8 @@ class Environment(IEnvironment):
             print(f"EPOCH {self.epoch}:")
             self.step = 0
             self.epoch += 1
-            print(f"Start learning...")
             for agent in self.agents:
-                if agent.has_learn:
-                    print(len(agent.rewards))
-                    Gt = torch.tensor([np.sum(agent.rewards[i:]*(self.gamma**(np.array(range(0, len(agent.rewards) - i))))) for i in range(len(agent.rewards))])
-                    plt.plot(range(len(Gt)), Gt)
-                    plt.plot(range(len(agent.rewards)),np.array(agent.rewards))
-                    plt.show()
-                    print(Gt)
-                    print("Limpa memoria")
-                agent.clear_memory()
-            print("end learning...")
-            print("new wolrd...")
+                agent.learn()
             self.__reset_without_intersec()
             
     def load(self, path : str):

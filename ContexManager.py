@@ -1,7 +1,7 @@
 # Local Application import
 from PyGameFacade import init
 from Repository import store_state
-
+import traceback
 
 
 class Visualization(object):
@@ -16,7 +16,5 @@ class Visualization(object):
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if exc_type is KeyboardInterrupt : store_state(self.state)
         if exc_type is not None:
-            print(exc_type)
-            print(exc_value)
-            exc_traceback.print_exc()
+            traceback.print_exception(exc_type, exc_value, exc_traceback)
         if self.state["visualization"] : quit()

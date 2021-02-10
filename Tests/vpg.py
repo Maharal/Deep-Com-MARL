@@ -62,7 +62,7 @@ while True:
     # preprocess rewards
     rewards = np.array(rewards)
     # calculate rewards to go for less variance
-    R = torch.tensor([np.sum(rewards[i:]*(gamma**np.array(range(i, len(rewards))))) for i in range(len(rewards))])
+    R = torch.tensor([np.sum(rewards[i:]*((gamma**np.array(range(i, len(rewards))) - i))) for i in range(len(rewards))])
     # or uncomment following line for normal rewards
     #R = torch.sum(torch.tensor(rewards))
 

@@ -9,7 +9,7 @@ from Universe import Environment
 
 
 # Configuration of object environment
-NUM_LANDMARKS = 10
+NUM_LANDMARKS = 5
 NUM_AGENTS = 10
 SIZE_SCREEN = (512, 512)
 BORDER = 80
@@ -47,7 +47,7 @@ environment_param = {
     "force_wall" : 6,
     "eta" : 0.1,
     "size_channel" : 3, 
-    "num_steps" : 4000
+    "num_steps" : 100
 }
 
 
