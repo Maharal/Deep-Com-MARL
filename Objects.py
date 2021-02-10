@@ -54,7 +54,7 @@ class Agent(MovableBase):
         self.gamma = 0.995
 
     def stocastic_msg(self, msg : torch.Tensor):
-        return np.array([1 if random() <= t else 0 for t in msg])
+        return toch.Tensor([1 if random() <= t else 0 for t in msg])
 
     def __perception(self, environment):
         msg = [agent.mensage for agent in environment.agents if agent is not self]
