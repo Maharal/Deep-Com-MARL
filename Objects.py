@@ -9,6 +9,7 @@ from numpy.random import normal
 import numpy as np
 from time import sleep
 import matplotlib.pyplot as plt
+from torch.distributions.bernoulli import Bernoulli
 
 # Local application import
 from PyGameFacade import *
@@ -18,7 +19,7 @@ from Base import ObjectBase, MovableBase
 
 
 class Brain(nn.Module):
-    def __init__(self, n_landmark : int, n_agents : int, size_channel : int, hidden_size = 128):
+    def __init__(self, n_landmark : int, n_agents : int, size_channel : int, hidden_size = 64):
         super(Brain, self).__init__()
         self.lstm1 = nn.LSTM(2 * 2 * n_landmark + (n_agents - 1) * size_channel + 4, hidden_size, batch_first = True)
         self.seq = nn.Sequential(nn.Linear(hidden_size, 32), nn.ReLU(), nn.Linear(32, 3 + size_channel), nn.Sigmoid())
@@ -27,7 +28,6 @@ class Brain(nn.Module):
         self.c = torch.zeros(1, 1, hidden_size).to(self.device)
         
     def forward(self, x):
-#        x = x.reshape(batch_size, num_steps, -1).to(self.device)
         hs, (self.h, self.c) = self.lstm1(x, (self.h, self.c))
         out = self.seq(hs)
         return out
@@ -82,12 +82,14 @@ class Agent(MovableBase):
         self.states.append(event)
         self.brain.eval()
         with torch.no_grad():
-            actions = self.brain.forward(event.reshape(1, 1, -1)).reshape(-1)
-        self.__walk(actions[0], actions[1], actions[2])  
-        self.mensage = actions[3:]
+            act = self.brain.forward(event.reshape(1, 1, -1)).reshape(-1)
+            act = Bernoulli(act).sample()
+            self.actions.append(act)
+        self.__walk(act[0], act[1], act[2])  
+        self.mensage = act[3:]
         self.__forward()
         self.__update_rewards()
-        return actions
+        return act
 
     def store(self, file_path : str):
         torch.save(self.brain.state_dict(), file_path)
@@ -115,13 +117,15 @@ class Agent(MovableBase):
             print(self, "start to learn")
             self.brain.train()
             self.optimizer.zero_grad()
-            Gt = 0.2 * torch.tensor([np.sum(self.rewards[i:]*(self.gamma**(np.array(range(0, len(self.rewards) - i))))) for i in range(len(self.rewards))], requires_grad = False)            
+            Gt = torch.tensor([np.sum(self.rewards[i:]*(self.gamma**(np.array(range(0, len(self.rewards) - i))))) for i in range(len(self.rewards))], requires_grad = False)            
             states = torch.stack(self.states, dim = 0).unsqueeze(0)
-            actions = self.brain(states)
-            log = torch.log(1 - actions).sum(axis = 2)
-            loss = torch.mean(Gt * log)
+            action = self.brain(states)
+            sampler = Bernoulli(action)
+            log = -sampler.log_prob(torch.stack(self.actions, dim = 0).unsqueeze(0)).sum(dim = 2)
+            loss = torch.sum(Gt * log)
             loss.backward()
             self.optimizer.step()     
+            print("%f" % loss)
         self.clear_memory()
 
 class Landmark(MovableBase):
@@ -142,7 +146,7 @@ class Landmark(MovableBase):
             self.monitored_agents.append(agent)
         
     def reward_monitored(self, reward):
-        if len(self.monitored_agents) > 1 or reward >= 3:
+        if len(self.monitored_agents) > 1 or reward >= 3 or reward < -1:
             for agent in self.monitored_agents:
                 agent.add_reward(reward)
 
