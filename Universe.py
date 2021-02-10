@@ -103,7 +103,7 @@ class Environment(IEnvironment):
                 if comp_reward:
                     j.monitoring(i)
                     if j.frozen:
-                        j.reward_monitored(-1)
+                        j.reward_monitored(-0.1)
 
     def __fix_position(self, i : Landmark, items : MovableBase):
         for j in items:
@@ -115,7 +115,7 @@ class Environment(IEnvironment):
     def __frozen(self, landmark):
         for goal in self.goals:
             if landmark.is_inside(goal) and not landmark.frozen:
-                landmark.reward_monitored(5)
+                landmark.reward_monitored(10)
                 landmark.frozen = True
                 break    
 
@@ -153,7 +153,7 @@ class Environment(IEnvironment):
             self.step = 0
             self.epoch += 1
             for agent in self.agents:
-                agent.learn()
+                agent.learn(self.epoch)
             self.__reset_without_intersec()
             
     def load(self, path : str):

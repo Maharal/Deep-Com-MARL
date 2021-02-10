@@ -10,7 +10,7 @@ from Universe import Environment
 
 # Configuration of object environment
 NUM_LANDMARKS = 10
-NUM_AGENTS = 10
+NUM_AGENTS = 8
 SIZE_SCREEN = (512, 512)
 BORDER = 80
 CONSTRAIN_GEN = (BORDER, BORDER, SIZE_SCREEN[0]-BORDER, SIZE_SCREEN[1]-BORDER)
@@ -47,7 +47,7 @@ environment_param = {
     "force_wall" : 6,
     "eta" : 0.1,
     "size_channel" : 6, 
-    "num_steps" : 1000
+    "num_steps" : 4000
 }
 
 

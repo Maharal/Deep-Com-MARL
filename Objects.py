@@ -51,6 +51,8 @@ class Agent(MovableBase):
         self.reward = 0
         self.has_learn = False
         self.optimizer = torch.optim.Adam(self.brain.parameters(), lr = 0.01)
+        self.optimizer.zero_grad()
+
         self.gamma = 0.995
 
     def stocastic_msg(self, msg : torch.Tensor):
@@ -112,20 +114,20 @@ class Agent(MovableBase):
         self.rewards.append(self.reward)
         self.reward = 0
 
-    def learn(self):
+    def learn(self, epoch):
         if self.has_learn:
-            print(self, "start to learn")
             self.brain.train()
-            self.optimizer.zero_grad()
             Gt = torch.tensor([np.sum(self.rewards[i:]*(self.gamma**(np.array(range(0, len(self.rewards) - i))))) for i in range(len(self.rewards))], requires_grad = False)            
             states = torch.stack(self.states, dim = 0).unsqueeze(0)
             action = self.brain(states)
             sampler = Bernoulli(action)
             log = -sampler.log_prob(torch.stack(self.actions, dim = 0).unsqueeze(0)).sum(dim = 2)
-            loss = torch.sum(Gt * log)
+            loss = 0.2 * torch.sum(Gt * log)
+            print("%f" % (loss * 5))
             loss.backward()
-            self.optimizer.step()     
-            print("%f" % loss)
+            if epoch % 5:
+                self.optimizer.step()     
+                self.optimizer.zero_grad()
         self.clear_memory()
 
 class Landmark(MovableBase):
