@@ -46,7 +46,7 @@ environment_param = {
     "dist_wall" : BORDER,
     "force_wall" : 6,
     "eta" : 0.1,
-    "size_channel" : 3, 
+    "size_channel" : 16, 
     "num_steps" : 1000
 }
 

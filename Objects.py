@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from numpy.random import normal
 import numpy as np
 from time import sleep
+import matplotlib.pyplot as plt
 
 # Local application import
 from PyGameFacade import *
@@ -17,7 +18,7 @@ from Base import ObjectBase, MovableBase
 
 
 class Brain(nn.Module):
-    def __init__(self, n_landmark : int, n_agents : int, size_channel : int, hidden_size = 16):
+    def __init__(self, n_landmark : int, n_agents : int, size_channel : int, hidden_size = 128):
         super(Brain, self).__init__()
         self.lstm1 = nn.LSTM(2 * 2 * n_landmark + (n_agents - 1) * size_channel + 4, hidden_size, batch_first = True)
         self.seq = nn.Sequential(nn.Linear(hidden_size, 32), nn.ReLU(), nn.Linear(32, 3 + size_channel), nn.Sigmoid())
@@ -27,7 +28,7 @@ class Brain(nn.Module):
         
     def forward(self, x):
 #        x = x.reshape(batch_size, num_steps, -1).to(self.device)
-        hs, (h, c) = self.lstm1(x, (self.h, self.c))
+        hs, (self.h, self.c) = self.lstm1(x, (self.h, self.c))
         out = self.seq(hs)
         return out
 
@@ -51,6 +52,9 @@ class Agent(MovableBase):
         self.has_learn = False
         self.optimizer = torch.optim.Adam(self.brain.parameters(), lr = 0.01)
         self.gamma = 0.995
+
+    def stocastic_msg(self, msg : torch.Tensor):
+        return np.array([1 if random() <= t else 0 for t in msg])
 
     def __perception(self, environment):
         msg = [agent.mensage for agent in environment.agents if agent is not self]
@@ -116,7 +120,6 @@ class Agent(MovableBase):
             actions = self.brain(states)
             log = torch.log(1 - actions).sum(axis = 2)
             loss = torch.mean(Gt * log)
-            loss = torch.mean(actions)
             loss.backward()
             self.optimizer.step()     
         self.clear_memory()
