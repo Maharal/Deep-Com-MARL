@@ -50,7 +50,7 @@ class Agent(MovableBase):
         self._id = _id
         self.reward = 0
         self.has_learn = False
-        self.optimizer = torch.optim.Adam(self.brain.parameters(), lr = 0.01)
+        self.optimizer = torch.optim.Adam(self.brain.parameters())
         self.optimizer.zero_grad()
         self.gamma = 0.995
 
@@ -123,12 +123,11 @@ class Agent(MovableBase):
             action = self.brain(states)
             sampler = Bernoulli(action)
             log = sampler.log_prob(torch.stack(self.actions, dim = 0).unsqueeze(0)).sum(dim = 2)
-            loss = -0.1 * torch.sum(Gt * log) 
+            loss = 0.1 * torch.sum(Gt * log) 
             print("%f" % (loss * 10))
+            self.optimizer.zero_grad()
             loss.backward()
-            if epoch % 10 == 0:
-                self.optimizer.step()     
-                self.optimizer.zero_grad()
+            self.optimizer.step()     
         self.clear_memory()
 
 class Landmark(MovableBase):

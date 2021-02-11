@@ -63,8 +63,7 @@ while True:
     rewards = np.array(rewards)
     # calculate rewards to go for less variance
     R = torch.tensor([np.sum(rewards[i:]*((gamma**np.array(range(i, len(rewards))) - i))) for i in range(len(rewards))])
-    if n_episode % 1000000 == 0:
-        plt.plot(range(len(reward)), reward)
+    if n_episode % 100 == 0:
         plt.plot(range(len(R)), R)
         plt.show()
     # or uncomment following line for normal rewards
@@ -77,7 +76,7 @@ while True:
     # calculate gradient
     probs = policy(states)
     sampler = Categorical(probs)
-    log_probs = -sampler.log_prob(actions)   # "-" because it was built to work with gradient descent, but we are using gradient ascent
+    log_probs = sampler.log_prob(actions)   # "-" because it was built to work with gradient descent, but we are using gradient ascent
     pseudo_loss = torch.sum(log_probs * R) # loss that when differentiated with autograd gives the gradient of J(θ)
     # update policy weights
     optimizer.zero_grad()
