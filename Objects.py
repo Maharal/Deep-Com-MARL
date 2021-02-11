@@ -89,6 +89,8 @@ class Agent(MovableBase):
         self.__walk(act[0], act[1], act[2])  
         self.mensage = act[3:]
         self.__forward()
+        if self.reward == 0:
+            self.add_reward(-0.001)
         self.__update_rewards()
         return act
 
