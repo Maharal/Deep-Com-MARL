@@ -115,7 +115,7 @@ class Environment(IEnvironment):
     def __frozen(self, landmark):
         for goal in self.goals:
             if landmark.is_inside(goal) and not landmark.frozen:
-                landmark.reward_monitored(10)
+                landmark.reward_monitored(5)
                 landmark.frozen = True
                 break    
 

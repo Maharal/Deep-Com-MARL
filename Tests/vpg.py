@@ -6,7 +6,7 @@ from torch.distributions import Categorical
 import numpy as np
 import gym
 from collections import deque
-
+import matplotlib.pyplot as plt
 # define policy network
 class policy_net(nn.Module):
     def __init__(self, nS, nH, nA): # nS: state space size, nH: n. of neurons in hidden layer, nA: size action space
@@ -63,6 +63,10 @@ while True:
     rewards = np.array(rewards)
     # calculate rewards to go for less variance
     R = torch.tensor([np.sum(rewards[i:]*((gamma**np.array(range(i, len(rewards))) - i))) for i in range(len(rewards))])
+    if n_episode % 1000000 == 0:
+        plt.plot(range(len(reward)), reward)
+        plt.plot(range(len(R)), R)
+        plt.show()
     # or uncomment following line for normal rewards
     #R = torch.sum(torch.tensor(rewards))
 
