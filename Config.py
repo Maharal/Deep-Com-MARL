@@ -47,7 +47,7 @@ environment_param = {
     "force_wall" : 6,
     "eta" : 0.1,
     "size_channel" : 6, 
-    "num_steps" : 1000
+    "num_steps" : 3000
 }
 
 

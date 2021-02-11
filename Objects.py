@@ -50,7 +50,7 @@ class Agent(MovableBase):
         self._id = _id
         self.reward = 0
         self.has_learn = False
-        self.optimizer = torch.optim.Adam(self.brain.parameters())
+        self.optimizer = torch.optim.Adam(self.brain.parameters(), lr = 0.001)
         self.optimizer.zero_grad()
         self.gamma = 0.995
 
