@@ -37,7 +37,7 @@ class Environment(IEnvironment):
         self.num_steps = num_steps
         self.step = 0
         self.epoch = 0
-        self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_channel, num_steps) for _id in range(agent_param["num"])]
+        self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_channel, num_steps, agent_param["hiden_state"]) for _id in range(agent_param["num"])]
         self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
 

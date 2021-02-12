@@ -19,7 +19,7 @@ from Base import ObjectBase, MovableBase
 
 
 class Brain(nn.Module):
-    def __init__(self, n_landmark : int, n_agents : int, size_channel : int, hidden_size = 64):
+    def __init__(self, n_landmark : int, n_agents : int, size_channel : int, hidden_size : int):
         super(Brain, self).__init__()
         self.lstm1 = nn.LSTM(2 * 2 * n_landmark + (n_agents - 1) * size_channel + 4, hidden_size, batch_first = True)
         self.seq = nn.Sequential(nn.Linear(hidden_size, 32), nn.ReLU(), nn.Linear(32, 3 + size_channel), nn.Sigmoid())
@@ -34,9 +34,9 @@ class Brain(nn.Module):
 
 
 class Agent(MovableBase):
-    def __init__(self, _id : int, agent_param : dict, n_agents : int, n_landmarks : int, size_chanel : int, size_epoch : int, vel_const : float = 10):
+    def __init__(self, _id : int, agent_param : dict, n_agents : int, n_landmarks : int, size_chanel : int, size_epoch : int, hidden_size: int, vel_const : float = 10):
         super().__init__(**agent_param)
-        self.brain = Brain(n_landmarks, n_agents, size_chanel)
+        self.brain = Brain(n_landmarks, n_agents, size_chanel, hidden_size)
         self.size_chanel = size_chanel
         self.size_epoch = size_epoch
         self.epoch = 0
