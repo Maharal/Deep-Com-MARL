@@ -114,7 +114,8 @@ class Environment(IEnvironment):
         for j in items:
             if i != j and i.has_intersection(j):
                 d_pos = i.pos - j.pos
-                d_pos.scale_to_length(abs(i.radius + j.radius - d_pos.magnitude()))
+                if d_pos.magnitude() > 0:
+                    d_pos.scale_to_length(abs(i.radius + j.radius - d_pos.magnitude()))
                 i.pos += d_pos
 
     def __frozen(self, landmark):
