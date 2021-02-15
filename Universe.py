@@ -30,7 +30,8 @@ class Environment(IEnvironment):
             size_channel : int, 
             num_steps : int,
             time_penality : float,
-            hit : float
+            hit : float,
+            frozen_hit :  float
         ):
         self.eta = eta
         self.size_screen = size_screen
@@ -44,6 +45,7 @@ class Environment(IEnvironment):
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
         self.time_penality = time_penality
         self.hit = hit
+        self.frozen_hit = frozen_hit
         
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
@@ -106,7 +108,7 @@ class Environment(IEnvironment):
                 if comp_reward:
                     j.monitoring(i)
                     if j.frozen:
-                        j.reward_monitored(self.time_penality)
+                        j.reward_monitored(self.frozen_hit)
 
     def __fix_position(self, i : Landmark, items : MovableBase):
         for j in items:
@@ -139,6 +141,7 @@ class Environment(IEnvironment):
         for agent in self.agents:
             msg = agent.next_state(self)
             mensages.append(msg)
+            agent.add_reward(self.time_penality)
         for landmark in self.landmarks:
             landmark.next_state()
             landmark.clear_monitored()
