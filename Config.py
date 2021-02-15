@@ -9,8 +9,8 @@ from Universe import Environment
 
 
 # Configuration of object environment
-NUM_LANDMARKS = 1
-NUM_AGENTS = 3
+NUM_LANDMARKS = 10
+NUM_AGENTS = 30
 SIZE_SCREEN = (512, 512)
 BORDER = 80
 CONSTRAIN_GEN = (BORDER, BORDER, SIZE_SCREEN[0]-BORDER, SIZE_SCREEN[1]-BORDER)
@@ -48,7 +48,9 @@ environment_param = {
     "force_wall" : 6,
     "eta" : 0.1,
     "size_channel" : 4, 
-    "num_steps" : 3000
+    "num_steps" : 3000,
+    "time_penality" : -1/3000,
+    "hit" : 1.5
 }
 
 

@@ -90,7 +90,7 @@ class Agent(MovableBase):
         self.mensage = act[3:]
         self.__forward()
         if self.reward == 0:
-            self.add_reward(-0.001)
+            self.add_reward(-0.1)
         self.__update_rewards()
         return act
 
@@ -102,7 +102,8 @@ class Agent(MovableBase):
         self.brain.eval()
 
     def add_reward(self, r):
-        self.has_learn = True
+        if r > 0:
+            self.has_learn = True
         self.reward += r
             
     def clear_memory(self):
@@ -140,7 +141,6 @@ class Landmark(MovableBase):
     def next_state(self):
         if self.thresold < self.acc.magnitude() and not self.frozen: 
             self.vel += self.acc * dt
-            self.reward_monitored(0.5)
         super().next_state()
         
     def monitoring(self, agent : Agent):
@@ -148,12 +148,13 @@ class Landmark(MovableBase):
             self.monitored_agents.append(agent)
         
     def reward_monitored(self, reward):
-        if len(self.monitored_agents) > 1 or reward >= 3 or reward < -1:
+        if len(self.monitored_agents) > 1 and reward != 0:
             for agent in self.monitored_agents:
+                print(reward)
                 agent.add_reward(reward)
 
     def clear_monitored(self):
-        if self.acc.magnitude() <= 0.01:
+        if self.vel.magnitude() <= 0.1:
             self.monitored_agents = []
         
         

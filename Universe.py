@@ -28,7 +28,9 @@ class Environment(IEnvironment):
             dist_wall : float, 
             eta : float,
             size_channel : int, 
-            num_steps : int
+            num_steps : int,
+            time_penality : float,
+            hit : float
         ):
         self.eta = eta
         self.size_screen = size_screen
@@ -40,7 +42,8 @@ class Environment(IEnvironment):
         self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_channel, num_steps, agent_param["hiden_state"]) for _id in range(agent_param["num"])]
         self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
-
+        self.time_penality = time_penality
+        self.hit = hit
         
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
@@ -103,7 +106,7 @@ class Environment(IEnvironment):
                 if comp_reward:
                     j.monitoring(i)
                     if j.frozen:
-                        j.reward_monitored(-0.1)
+                        j.reward_monitored(self.time_penality)
 
     def __fix_position(self, i : Landmark, items : MovableBase):
         for j in items:
@@ -115,7 +118,7 @@ class Environment(IEnvironment):
     def __frozen(self, landmark):
         for goal in self.goals:
             if landmark.is_inside(goal) and not landmark.frozen:
-                landmark.reward_monitored(5)
+                landmark.reward_monitored(self.hit)
                 landmark.frozen = True
                 break    
 
