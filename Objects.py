@@ -150,13 +150,16 @@ class Landmark(MovableBase):
     def reward_monitored(self, reward):
         if len(self.monitored_agents) > 1 and reward != 0:
             for agent in self.monitored_agents:
-                print(reward)
                 agent.add_reward(reward)
 
     def clear_monitored(self):
         if self.vel.magnitude() <= 0.1:
             self.monitored_agents = []
-        
+
+    def draw(self, screen : Surface):
+        dimensions = (self.pos.x - self.radius, self.pos.y - self.radius, self.diam, self.diam)
+        ellipse(screen, CYAN if self.frozen else (self.color if self.vel.magnitude() <= 0.1 else YELLOW), dimensions, self.stroke_weight)
+
         
 class Goal(ObjectBase):
     def __init__(self, goal_param : dict): 
