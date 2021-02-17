@@ -1,6 +1,7 @@
 # Standard import
-from random import random
+from random import random, shuffle
 from typing import List
+from math import pi, sin, cos
 
 # Third part import
 from numpy.core.fromnumeric import size
@@ -31,7 +32,8 @@ class Environment(IEnvironment):
             num_steps : int,
             time_penality : float,
             hit : float,
-            frozen_hit :  float
+            frozen_hit :  float,
+            push : float
         ):
         self.eta = eta
         self.size_screen = size_screen
@@ -46,6 +48,10 @@ class Environment(IEnvironment):
         self.time_penality = time_penality
         self.hit = hit
         self.frozen_hit = frozen_hit
+        self.ground = goal_param["setup"]["diam"]/4
+        self.temperature = self.ground
+        self.push = push
+        self.__support(self.landmarks, self.goals, self.temperature)
         
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
@@ -62,12 +68,16 @@ class Environment(IEnvironment):
             l.append(new)
         return l
 
+    def __support(self, landmarks : ObjectBase, goals : ObjectBase, r : float):
+        index = list(range(len(goals))) 
+        shuffle(index)
+        for i in range(len(goals)):
+            root = goals[index[i]].pos
+            teta = 2*pi*random()
+            landmarks[i].pos = Vector2(root.x + r * cos(teta), root.y + r * sin(teta))
+            landmarks[i].unfrozen()
+
     def __reset_without_intersec(self) -> List[ObjectBase]:
-        for land in self.landmarks:
-            land.new_pos()
-            land.frozen = False
-            while self.__has_has_intersection(self.landmarks, land):
-                land.new_pos()
         for goal in self.goals:
             goal.new_pos()
             while self.__has_has_intersection(self.goals, goal):
@@ -76,6 +86,7 @@ class Environment(IEnvironment):
             agent.new_pos()
             while self.__has_has_intersection(self.agents, agent):
                 agent.new_pos()
+        self.__support(self.landmarks, self.goals, self.temperature)
 
     def __apply_constrains(self, obj : MovableBase):
         width, height = self.size_screen
@@ -104,10 +115,11 @@ class Environment(IEnvironment):
                 d_pos = i.pos - j.pos
                 if d_pos.magnitude() > 0:
                     d_pos.scale_to_length(abs(i.radius + j.radius - d_pos.magnitude()))
-                i.add_force(d_pos)
+                    i.add_force(d_pos)
                 if comp_reward:
+                    j.reward_monitored(self.push)
                     j.monitoring(i)
-                    if j.frozen:
+                    if j.frozen and j.time_frozen < 100:
                         j.reward_monitored(self.frozen_hit)
 
     def __fix_position(self, i : Landmark, items : MovableBase):
@@ -122,7 +134,7 @@ class Environment(IEnvironment):
         for goal in self.goals:
             if landmark.is_inside(goal) and not landmark.frozen:
                 landmark.reward_monitored(self.hit)
-                landmark.frozen = True
+                landmark.frozen_land()
                 break    
 
     def __explore(self):
@@ -153,6 +165,11 @@ class Environment(IEnvironment):
 
     def next_state(self):
         self.step += 1
+        if sum([l.frozen for l in self.landmarks]) >= 3:
+            self.temperature *= 1.05
+        elif sum([l.frozen for l in self.landmarks]) == 0:
+            self.temperature = max(self.temperature * 0.9, self.ground)
+
         if self.step < self.num_steps:
             self.__explore()
         else:
@@ -162,11 +179,23 @@ class Environment(IEnvironment):
             for agent in self.agents:
                 agent.learn(self.epoch)
             self.__reset_without_intersec()
-            
+        for l in self.landmarks:
+            is_inside_goal = False
+            for goal in self.goals:
+                if l.is_inside(goal):
+                    is_inside_goal = True
+                    break
+            if not is_inside_goal and l.frozen:
+                l.unfrozen()
+
     def load(self, path : str):
+        self.step = 0
         for agent in self.agents:
             agent.load(f"{path}/model_{agent._id}.h5")
+            agent.clear_memory()
             
     def store(self, path : str):
+        self.step = 0
         for agent in self.agents:
+            agent.clear_memory()
             agent.store(f"{path}/model_{agent._id}.h5")

@@ -137,10 +137,13 @@ class Landmark(MovableBase):
         self.thresold = thresold
         self.monitored_agents = []
         self.frozen = False
+        self.time_frozen = 0
 
     def next_state(self):
         if self.thresold < self.acc.magnitude() and not self.frozen: 
             self.vel += self.acc * dt
+        if self.frozen:
+            self.time_frozen += 1
         super().next_state()
         
     def monitoring(self, agent : Agent):
@@ -160,7 +163,14 @@ class Landmark(MovableBase):
         dimensions = (self.pos.x - self.radius, self.pos.y - self.radius, self.diam, self.diam)
         ellipse(screen, CYAN if self.frozen else (self.color if self.vel.magnitude() <= 0.1 else YELLOW), dimensions, self.stroke_weight)
 
-        
+    def frozen_land(self):
+        self.frozen = True
+
+    def unfrozen(self):
+        self.frozen = False
+        self.time_frozen = 0
+
+
 class Goal(ObjectBase):
     def __init__(self, goal_param : dict): 
         super().__init__(**goal_param)

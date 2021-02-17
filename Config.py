@@ -49,9 +49,10 @@ environment_param = {
     "eta" : 0.1,
     "size_channel" : 4, 
     "num_steps" : 3000,
-    "time_penality" : -1.0/3000.0,
+    "time_penality" : 0,
     "hit" : 1,
-    "frozen_hit" : -0.1
+    "frozen_hit" : -0.01,
+    "push" : 0.0001
 }
 
 
