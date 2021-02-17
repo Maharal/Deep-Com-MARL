@@ -165,11 +165,6 @@ class Environment(IEnvironment):
 
     def next_state(self):
         self.step += 1
-        if sum([l.frozen for l in self.landmarks]) >= 3:
-            self.temperature *= 1.05
-        elif sum([l.frozen for l in self.landmarks]) == 0:
-            self.temperature = max(self.temperature * 0.9, self.ground)
-
         if self.step < self.num_steps:
             self.__explore()
         else:
@@ -179,6 +174,11 @@ class Environment(IEnvironment):
             for agent in self.agents:
                 agent.learn(self.epoch)
             self.__reset_without_intersec()
+            if sum([l.frozen for l in self.landmarks]) >= 3:
+                self.temperature *= 1.05
+            elif sum([l.frozen for l in self.landmarks]) == 0:
+                self.temperature = max(self.temperature * 0.9, self.ground)
+
         for l in self.landmarks:
             is_inside_goal = False
             for goal in self.goals:
