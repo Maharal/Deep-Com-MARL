@@ -10,7 +10,7 @@ from Universe import Environment
 
 # Configuration of object environment
 NUM_LANDMARKS = 4
-NUM_AGENTS = 6
+NUM_AGENTS = 5
 SIZE_SCREEN = (512, 512)
 BORDER = 80
 CONSTRAIN_GEN = (BORDER, BORDER, SIZE_SCREEN[0]-BORDER, SIZE_SCREEN[1]-BORDER)
@@ -19,7 +19,7 @@ CONSTRAIN_GEN = (BORDER, BORDER, SIZE_SCREEN[0]-BORDER, SIZE_SCREEN[1]-BORDER)
 environment_param = {
     "agent_param" : {
         "num" : NUM_AGENTS,
-        "hiden_state" : 8,
+        "hiden_state" : 180,
         "setup" : {
             "diam" : 15, 
             "color": RED,

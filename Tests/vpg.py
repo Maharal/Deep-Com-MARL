@@ -23,7 +23,7 @@ class policy_net(nn.Module):
 # create environment
 env = gym.make("CartPole-v1")
 # instantiate the policy
-policy = policy_net(env.observation_space.shape[0], 20, env.action_space.n)
+policy = policy_net(env.observation_space.shape[0], 100, env.action_space.n)
 # create an optimizer
 optimizer = torch.optim.Adam(policy.parameters())
 # initialize gamma and stats
@@ -63,9 +63,7 @@ while True:
     rewards = np.array(rewards)
     # calculate rewards to go for less variance
     R = torch.tensor([np.sum(rewards[i:]*((gamma**np.array(range(i, len(rewards))) - i))) for i in range(len(rewards))])
-    if n_episode % 100 == 0:
-        plt.plot(range(len(R)), R)
-        plt.show()
+
     # or uncomment following line for normal rewards
     #R = torch.sum(torch.tensor(rewards))
 

@@ -41,7 +41,7 @@ class Environment(IEnvironment):
         self.dist_wall = dist_wall
         self.num_steps = num_steps
         self.step = 0
-        self.epoch = 0
+        self.episode = 0
         self.agents = [Agent(_id, agent_param["setup"], agent_param["num"], landmark_param["num"], size_channel, num_steps, agent_param["hiden_state"]) for _id in range(agent_param["num"])]
         self.landmarks = self.__gen_without_intersec(Landmark, landmark_param["setup"], landmark_param["num"])
         self.goals = self.__gen_without_intersec(Goal, goal_param["setup"], goal_param["num"])
@@ -49,9 +49,11 @@ class Environment(IEnvironment):
         self.hit = hit
         self.frozen_hit = frozen_hit
         self.ground = goal_param["setup"]["diam"]/4
+        self.ceiling = size_screen[0]/2
         self.temperature = self.ground
         self.push = push
         self.__support(self.landmarks, self.goals, self.temperature)
+        self.loss = []
         
     def __has_has_intersection(self, items : list, item : ObjectBase) -> bool:
         for i in items:
@@ -168,16 +170,16 @@ class Environment(IEnvironment):
         if self.step < self.num_steps:
             self.__explore()
         else:
-            print(f"EPOCH {self.epoch}:")
             self.step = 0
-            self.epoch += 1
-            for agent in self.agents:
-                agent.learn(self.epoch)
+            self.episode += 1
+            l = np.mean([agent.learn(self.episode) for agent in self.agents])
+            print(f"episode {self.episode}: Loss: {l}")
+            self.loss.append(l)
             self.__reset_without_intersec()
             if sum([l.frozen for l in self.landmarks]) >= 3:
-                self.temperature *= 1.05
+                self.temperature = min(1.05 * self.temperature, self.ceiling)
             elif sum([l.frozen for l in self.landmarks]) == 0:
-                self.temperature = max(self.temperature * 0.9, self.ground)
+                self.temperature = max(0.9 * self.temperature, self.ground)
 
         for l in self.landmarks:
             is_inside_goal = False

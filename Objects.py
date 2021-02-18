@@ -34,12 +34,12 @@ class Brain(nn.Module):
 
 
 class Agent(MovableBase):
-    def __init__(self, _id : int, agent_param : dict, n_agents : int, n_landmarks : int, size_chanel : int, size_epoch : int, hidden_size: int, vel_const : float = 10):
+    def __init__(self, _id : int, agent_param : dict, n_agents : int, n_landmarks : int, size_chanel : int, size_episode : int, hidden_size: int, vel_const : float = 10):
         super().__init__(**agent_param)
         self.brain = Brain(n_landmarks, n_agents, size_chanel, hidden_size)
         self.size_chanel = size_chanel
-        self.size_epoch = size_epoch
-        self.epoch = 0
+        self.size_episode = size_episode
+        self.episode = 0
         self.rewards = []
         self.actions = []
         self.states = []
@@ -50,7 +50,7 @@ class Agent(MovableBase):
         self._id = _id
         self.reward = 0
         self.has_learn = False
-        self.optimizer = torch.optim.Adam(self.brain.parameters(), lr = 0.001)
+        self.optimizer = torch.optim.Adam(self.brain.parameters(), lr = 0.005)
         self.optimizer.zero_grad()
         self.gamma = 0.995
 
@@ -114,7 +114,8 @@ class Agent(MovableBase):
         self.rewards.append(self.reward)
         self.reward = 0
 
-    def learn(self, epoch):
+    def learn(self, episode):
+        loss = torch.Tensor([0])
         if self.has_learn:
             self.brain.train()
             Gt = torch.tensor([np.sum(self.rewards[i:]*(self.gamma**(np.array(range(0, len(self.rewards) - i))))) for i in range(len(self.rewards))], requires_grad = False)            
@@ -124,12 +125,13 @@ class Agent(MovableBase):
             action = self.brain(states)
             sampler = Bernoulli(action)
             log = sampler.log_prob(torch.stack(self.actions, dim = 0).unsqueeze(0)).sum(dim = 2)
-            loss = 0.1 * torch.sum(Gt * log) 
-            print("%f" % (loss * 10))
-            self.optimizer.zero_grad()
+            loss = torch.sum(Gt * log) 
             loss.backward()
-            self.optimizer.step()     
+            if episode % 10 == 0:
+                self.optimizer.step()     
+                self.optimizer.zero_grad()
         self.clear_memory()
+        return loss.detach()
 
 class Landmark(MovableBase):
     def __init__(self, landmark_param : dict, thresold : float = 5):
