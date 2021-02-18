@@ -115,7 +115,7 @@ class Agent(MovableBase):
         self.reward = 0
 
     def learn(self, episode):
-        loss = torch.Tensor([0])
+        loss = torch.zeros(1)
         if self.has_learn:
             self.brain.train()
             Gt = torch.tensor([np.sum(self.rewards[i:]*(self.gamma**(np.array(range(0, len(self.rewards) - i))))) for i in range(len(self.rewards))], requires_grad = False)            
