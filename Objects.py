@@ -115,7 +115,6 @@ class Agent(MovableBase):
         self.reward = 0
 
     def learn(self, episode):
-        loss = torch.zeros(1)
         if self.has_learn:
             self.brain.train()
             Gt = torch.tensor([np.sum(self.rewards[i:]*(self.gamma**(np.array(range(0, len(self.rewards) - i))))) for i in range(len(self.rewards))], requires_grad = False)            
@@ -130,8 +129,10 @@ class Agent(MovableBase):
             if episode % 10 == 0:
                 self.optimizer.step()     
                 self.optimizer.zero_grad()
+            return loss.detach()
+        else:
+            return 0
         self.clear_memory()
-        return loss.detach()
 
 class Landmark(MovableBase):
     def __init__(self, landmark_param : dict, thresold : float = 5):
